@@ -1,0 +1,117 @@
+{
+    "0967552171": "outcomming",
+    "0967552172": "incomming"
+}
+class Logger:
+    def log(self, message):
+        pass
+class FileLogger:
+    def log(self, message):
+        return f"File: {message}"
+class ConsoleLogger(FileLogger):
+    def log(self, message):
+        return f"Console: {message}"
+class ServerLogger(FileLogger):
+    def log(self, message):
+        return f"Server: {message}"
+class NetworkMonitor:
+    def __init__(self, logger:FileLogger):
+        self.logger=logger
+    def check(self):
+        return self.logger.log('мережа працює')
+log1=ConsoleLogger()
+log2=ServerLogger()
+log3=FileLogger()
+monitor1=NetworkMonitor(log1)
+monitor2=NetworkMonitor(log2)
+monitor3=NetworkMonitor(log3)
+print(monitor1.check()) 
+print(monitor2.check()) 
+print(monitor3.check()) 
+class Calling:
+    def calling(self):
+        return "make call"
+class SMS:
+    def send_sms(self):
+        return "send sms"
+class NetworkConnection:
+    def net_connection(self):
+        return "connection to network"
+class TelecomDevice(NetworkConnection):
+    def working_telecomdevice(self):
+        return self.net_connection()
+class IoTDevice(SMS):
+    def send_data(self):
+        return f"from MCU: {self.send_sms()}"
+
+iot=IoTDevice().send_data()
+print(iot)
+from abc import ABC, abstractmethod
+#2.1
+class Tarif(ABC):
+    @abstractmethod
+    def return_tarif(self, minutes):
+        pass
+class BaseTarif(Tarif):
+    def return_tarif(self, minutes):
+        return minutes*1
+class ProTarif(Tarif):
+    def return_tarif(self,minutes):
+       return minutes*2
+
+#2.2
+class VoiceTarif(Tarif):
+    def return_tarif(self, minutes):
+       return minutes*1.4
+class DataTarif(Tarif):
+    def return_tarif(self, minutes):
+        return minutes*3
+class RoamingTarif(Tarif):
+    def return_tarif(self,minutes):
+        return minutes*4
+
+
+import json
+class User:
+    def __init__(self, number, status):
+        self.list_status=['outcomming', 'incomming']
+        self.status=status
+        self.number=number
+        self.user_info={}
+    def return_status(self):
+        if self.status.lower() not in self.list_status or (len(self.number)<10 or len(self.number)>10):
+            raise ValueError("unknown status or phone is no correct")
+        self.user_info[self.number]=self.status
+        return self.user_info
+class ProcessingCall:
+    def __init__(self, user1, user2):
+        self.user1=user1
+        self.user2=user2
+        self.info={}
+    def processing_call(self):
+        if self.user1==self.user2:
+            return "double status"
+        self.info.update(self.user1)
+        self.info.update(self.user2)
+        return self.info
+class CallReport:
+    def __init__(self, calling_inform: dict):
+        self.calling_inform=calling_inform
+    def return_calling_info(self):
+        return self.calling_inform
+class SaveToJson:
+    def __init__(self, f_name):
+        self.f_name=f_name
+    def save_call(self, report: dict):
+        with open(self.f_name, 'r') as f:
+            data=f.read().strip()
+            di=json.loads(data)
+        di.update(report) #старий json + новий report
+        with open(self.f_name, 'w') as f:
+            json.dump(di, f, indent=4)
+
+u1=User('0967552171', 'outcomming').return_status()
+u2=User('0967552172', 'incomming').return_status()
+p=ProcessingCall(u1, u2).processing_call()
+report=CallReport(p).return_calling_info()
+SaveToJson("report.json").save_call(report)
